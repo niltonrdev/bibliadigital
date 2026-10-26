@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.env.local
+*.local
+biblia-full.json
+nt-temp.json
+tsconfig.tsbuildinfo
