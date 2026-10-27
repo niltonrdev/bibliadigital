@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getBook, nextChapter, prevChapter } from "../lib/bible";
 import { READERS, type ReaderId } from "../lib/readers";
 import type { Comment, Highlight } from "../lib/types";
@@ -25,6 +25,7 @@ type Props = {
 };
 
 export function ChapterPage(props: Props) {
+  const navigate = useNavigate();
   const { bookId, chapter } = useParams();
   const book = getBook(Number(bookId));
   const ch = Number(chapter);
@@ -35,6 +36,7 @@ export function ChapterPage(props: Props) {
   const [showChapterChat, setShowChapterChat] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     void props.pingPresence();
     const t = window.setInterval(() => void props.pingPresence(), 20000);
     return () => window.clearInterval(t);
@@ -55,6 +57,34 @@ export function ChapterPage(props: Props) {
   }, [props.highlights]);
 
   if (!book) return <p>Capítulo não encontrado.</p>;
+
+  async function markAndAdvance() {
+    await props.markRead();
+    if (next) {
+      navigate(`/livro/${next.bookId}/${next.chapter}`);
+    }
+  }
+
+  const arrows = (
+    <div className="chapter-nav">
+      {prev ? (
+        <Link className="btn" to={`/livro/${prev.bookId}/${prev.chapter}`}>
+          ← Anterior
+        </Link>
+      ) : (
+        <span />
+      )}
+      {next ? (
+        <Link className="btn primary" to={`/livro/${next.bookId}/${next.chapter}`}>
+          Próximo →
+        </Link>
+      ) : (
+        <span className="muted" style={{ alignSelf: "center" }}>
+          Fim do Novo Testamento
+        </span>
+      )}
+    </div>
+  );
 
   const selectedHighlights = selected ? byVerse.get(selected) ?? [] : [];
   const verseComments = props.comments.filter((c) => c.verse === selected);
@@ -113,14 +143,15 @@ export function ChapterPage(props: Props) {
             Desmarcar capítulo
           </button>
         ) : (
-          <button className="btn primary" onClick={() => void props.markRead()}>
-            Marcar como lido
+          <button className="btn primary" onClick={() => void markAndAdvance()}>
+            Marcar como lido e seguir
           </button>
         )}
         <button className="btn" onClick={() => setShowChapterChat(true)}>
           Comentários do capítulo
         </button>
       </div>
+      {arrows}
 
       {selected != null && (
         <div className="sheet">

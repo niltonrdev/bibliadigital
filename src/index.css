@@ -212,3 +212,15 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
   color: var(--muted);
   margin-bottom: 12px;
 }
+
+.chapter-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.chapter-nav .btn {
+  text-align: center;
+  width: 100%;
+}
